@@ -1,0 +1,6 @@
+/datasets/
+/runs/
+
+/venv*
+
+*.pt

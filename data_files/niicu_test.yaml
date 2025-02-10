@@ -1,0 +1,11 @@
+path: /media/citi-ai/matthew/mot-detection-training/datasets/niicu_test/yolo/
+# train: images/rgb
+# val: images/rgb
+# test: images/rgb
+train: images/thermal
+val: images/thermal
+test: images/thermal
+names:
+  0: Person
+  1: DontCare
+nc: 2

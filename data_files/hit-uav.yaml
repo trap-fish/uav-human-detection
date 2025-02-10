@@ -1,0 +1,14 @@
+path: /media/citi-ai/matthew/mot-detection-training/datasets/filtered/hit-uav
+train: train/images
+val: val/images
+test: test/images
+names:
+  0: Person
+  1: DontCare
+  # the original classes:
+  # 0: Person
+  # 1: Car
+  # 2: Bicycle
+  # 3: OtherVehicle
+  # 4: DontCare
+nc: 2
