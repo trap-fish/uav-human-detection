@@ -1,94 +1,96 @@
 from ultralytics import YOLO, RTDETR
 import os
+from datetime import datetime
 
-# # Load a model
-# model = YOLO("yolo11n.pt") # trained on coco data only
+expdate = datetime.today().strftime('%Y%m%d')
+
+wkdir = "/media/citi-ai/matthew/uav-human-detection"
+
+# yaml files for datasets
+data_rltv_path = "data_files/"
+datasets = ['combined.yaml', "Okutama.yaml", "VisDrone.yaml", "hit-uav.yaml"]
 
 # model paths
-yolo11n_visdrone_pth = "/media/citi-ai/matthew/visdrone-train/runs/detect/train/weights/best.pt"
+model_rltv_path = "models/"
 yolo11n_pth = "yolo11n.pt"
 yolo11s_pth = "yolo11s.pt"
-rtdetr_pth = "rtdetr-l.pt"
-rtdetrok_pth = "/media/citi-ai/matthew/visdrone-train/results/exp1_training_results/exp_1_rtdetr-l_SGD_lr0.01_Okutama_finetuned/weights/best.pt"
-rtdetrvd_pth = "/media/citi-ai/matthew/visdrone-train/results/exp1_training_results/exp_1_rtdetr-l_SGD_lr0.01_VisDrone/weights/best.pt"
-#rtdetr_resnet50_pth = "/media/citi-ai/matthew/visdrone-train/rtdetr-resnet50.yaml" # resnet50 backbone
 
 model_dir = {
-    #"yolo11n-vd": {"type": "yolo", "path": yolo11n_visdrone_pth},
     "yolo11n": {"type": "yolo", "path": yolo11n_pth},
-    # "yolo11s": {"type": "yolo", "path": yolo11s_pth},
-    #"rtdetr-l": {"type": "rtdetr-l", "path": rtdetr_pth},
-    #"rtdetr-l": {"type": "rtdetr-l", "path": rtdetrok_pth}
+    #"yolo11s": {"type": "yolo", "path": yolo11s_pth},
 }
 
 # Define experiments: model, optimizer, and learning rate combinations
 experiments = [
-    # {"optimizer": "Adam", "lr": 0.01},
-    # {"optimizer": "Adam", "lr": 0.001},
-    # {"optimizer": "Adam", "lr": 0.0005},
-    {"optimizer": "SGD", "lr": 0.01},
-    # {"optimizer": "SGD", "lr": 0.01},
-    # {"optimizer": "SGD", "lr": 0.001},
-    # {"optimizer": "SGD", "lr": 0.0005},
-    # duplicate runs for training on another dataset
-    #{"optimizer": "SGD", "lr": 0.001},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": None, "cos_lr": True},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 10, "cos_lr": True},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 22, "cos_lr": True},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": None, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.001, "freeze": None, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.0005, "freeze": None, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 10, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 22, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.001, "freeze": 10, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.0005, "freeze": 10, "cos_lr": False},
 ]
 
 # Paths and parameters
-data_path = "VisDrone.yaml" #"Okutama.yaml"  # Path to your dataset YAML file
 epochs = 400  # Number of training epochs
 imgsz = 640  # Image size for training
-results_dir = "/media/citi-ai/matthew/visdrone-train/results/exp3_ft_training_results"  # Directory to save results
-# Ensure results directory exists
+
+# Directory to save results
+res_rltv_dir = f"results/experiment_{expdate}"
+results_dir = os.path.join(wkdir, res_rltv_dir)
+print(results_dir)
+
 os.makedirs(results_dir, exist_ok=True)
 
-for model_name, model_info in model_dir.items():
-    # Train the model with the custom optimizer
-    # model.train(data="Okutama.yaml", epochs=20, imgsz=640, optimizer='Adam', lr0=0.001,  momentum=0.9)
-    print(f"\nTraining with model: {model_name}")
-    model_type = model_info["type"]
-    model_path = model_info["path"]
+for data_yml in datasets:
+    data_path = os.path.join(wkdir, data_rltv_path, data_yml)
 
-    # initialise model
-    if model_type == "yolo":
-        model = YOLO(model_path)
-    elif model_type == "rtdetr-l":
-        model = RTDETR(model_path)
-    else:
-        raise ValueError(f"Unknown model type: {model_type}")
-    
-    # # freeze the backbone + encode/decoder layers - only for finetuning
-    # for name, param in model.model.named_parameters():
-    #     param.requires_grad = False
+    # loop through each model
+    for model_name, model_info in model_dir.items():
+        # Train the model with the custom optimizer
+        print(f"\nTraining with model: {model_name}")
+        model_type = model_info["type"]
+        model_file = model_info["path"]
 
-    # Loop through experiments
-    for i, exp in enumerate(experiments):
-        print(f"\nStarting Experiment {i + 1}: {exp}")
-        
-        # if model_type == "rtdetr-l":
-        #     data_path = "VisDrone.yaml"
-        # else:
-        #     continue
-        # Define unique experiment name for results
-        exp_name = f"exp_{i + 1}_{model_name}_{exp['optimizer']}_lr{exp['lr']}_{data_path.split('.')[0]}_finetuned"
+        # initialise model
+        if model_type == "yolo":
+            model_path = os.path.join(wkdir, model_rltv_path, model_file)
+            if os.path.isfile(model_path):
+                model = YOLO(model_path)
+            else:
+                raise ValueError(f"Model file not found: {model_path}")
 
-        # Train the model
-        model.train(
-            data=data_path,
-            batch=32,
-            epochs=epochs,
-            imgsz=imgsz,
-            optimizer=exp["optimizer"],
-            lr0=exp["lr"],
-            patience=15,
-            project=results_dir,
-            name=exp_name,
-            freeze=10,
-            cos_lr=True,
-            augment=True
-            #single_cls=True
-        )
+        else:
+            raise ValueError(f"Unknown model type: {model_type}")
 
-        print(f"Experiment {i + 1} completed! Results saved in {results_dir}/{exp_name}")
+        # Loop through experiments
+        for i, exp in enumerate(experiments):
+            print(f"\nStarting Experiment {i + 1}: {exp}")
+            
+            
+            params = f"{exp['optimizer']}_lr{exp['lr']}_frz{exp['freeze']}_coslr{exp['cos_lr']}"
+            variation = data_path.split('/')[-1].split(".")[0]
+            exp_name = f"exp_{i + 1}_{model_name}_{variation}_{params}"
+
+            # Train the model
+            model.train(
+                data=data_path,
+                batch=16,
+                epochs=epochs,
+                imgsz=imgsz,
+                optimizer=exp["optimizer"],
+                lr0=exp["lr"],
+                patience=20,
+                project=results_dir,
+                name=exp_name,
+                freeze=exp["freeze"],
+                cos_lr=exp["cos_lr"],
+                augment=True
+            )
+
+            print(f"Experiment {i + 1} completed! Results saved in {results_dir}/{exp_name}")
 
 print("\nAll experiments completed!")

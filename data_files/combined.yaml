@@ -1,4 +1,4 @@
-path: /media/citi-ai/matthew/mot-detection-training/datasets/combined # dataset root dir
+path: /media/citi-ai/matthew/uav-human-detection/datasets/combined # dataset root dir
 train: train/images # train images (relative to 'path')  6471 images
 val: val/images # val images (relative to 'path')  548 images
 

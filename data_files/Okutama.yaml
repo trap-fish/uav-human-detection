@@ -1,0 +1,8 @@
+path: /media/citi-ai/matthew/uav-human-detection/datasets/Okutama/yolo-format
+
+train: train/images
+val: val/images
+test: test/images
+
+nc: 1  # Number of classes (1 class: Person)
+names: ['Person']  # Class names

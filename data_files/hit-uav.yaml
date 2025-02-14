@@ -1,4 +1,4 @@
-path: /media/citi-ai/matthew/mot-detection-training/datasets/filtered/hit-uav
+path: /media/citi-ai/matthew/uav-human-detection/datasets/filtered/hit-uav
 train: train/images
 val: val/images
 test: test/images

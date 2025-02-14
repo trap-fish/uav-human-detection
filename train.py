@@ -20,7 +20,3 @@ model.train(
             #freeze=10,
             #cos_lr=True
 )
-
-# # Perform inference on a test image or folder of images
-# test_image_path = "/path/to/test/image_or_folder"
-# model.predict(source=test_image_path, save=True)
