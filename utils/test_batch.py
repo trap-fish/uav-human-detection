@@ -1,41 +1,51 @@
-from ultralytics import YOLO
 import os
+import csv
+from ultralytics import YOLO
 
-# # Load a pretrained YOLO11n model
-#model = YOLO("/media/citi-ai/matthew/visdrone-train/results/exp1_training_results/exp_5_yolo11n-vd_SGD_lr0.001/weights/best.pt")
+# Define the root directory and dataset
+root_dir = "/media/citi-ai/matthew/uav-human-detection/"
+data_list = ["Okutama.yaml"]
+results_dir = os.path.join(root_dir, "results/experiment_20250214")
+output_csv = os.path.join(results_dir, "multidata_okutama_results_test.csv")
 
-# # Run inference on 'bus.jpg' with arguments
-# model.predict("/media/citi-ai/matthew/visdrone-train/datasets/Okutama/yolo-format/test/images/1.1.8.33.jpg", save=True, imgsz=640, conf=0.5)
+    # Initialize CSV
+with open(output_csv, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['experiment_name', 'dataset', 'precision', 'recall', 'mAP50', 'mAP95','fitness','', 'model_path'])
+    for datayml in data_list:
 
-exp_dir = "/media/citi-ai/matthew/visdrone-train/results/exp1_training_results/"
-data_path = "Okutama.yaml"
+        dataset = os.path.join(root_dir, "data_files", datayml)
 
-# Evaluate on the test dataset
-#results = model.val(data="Okutama.yaml", split='test', project=project_dir)  # Use the test split
+        for exp in os.listdir(results_dir):
+            if not os.path.isdir(os.path.join(results_dir, exp)):
+                ValueError(f"Warning: {exp} is not a directory. Skipping...")
+                continue
 
-skipdirs = [] # add any directories to skip over
+            exp_dir = os.path.join(results_dir, exp)
+            if not os.path.exists(os.path.join(exp_dir, "weights")):
+                ValueError(f"Warning: {exp} does not contain a weights directory. Skipping...")
+                continue
 
-for dirpath in os.listdir(exp_dir):
-    exp_path = os.path.join(exp_dir, dirpath)
-    results_path = os.path.join(exp_path, "evaluation")
-    os.makedirs(results_path, exist_ok=True)
-    
-    model_path = os.path.join(exp_path, "weights", "best.pt")
-    if "rtdetr" in model_path.split('/')[-3]:
-        continue
-    elif dirpath in skipdirs:
-        continue
+            model_path = os.path.join(exp_dir, "weights/best.pt")
 
-    # Load the model
-    print(model_path)
-    model = YOLO(model_path)
+            if 'okutama' not in model_path.lower():
+                continue
+            experiment_name = exp
 
-    # Evaluate the model
-    results = model.val(data=data_path, split='test', project=results_path)
+            print(f"Testing {experiment_name} with model {model_path}")
 
-    # Save results to a file
-    output_file = os.path.join(results_path, f"{exp_path}_results.txt")
-    with open(output_file, "w") as f:
-        f.write(f"Evaluation Results for {exp_path}:\n")
-        f.write(str(results))
-        f.close()
+            # Load model and run validation
+            model = YOLO(model_path)
+            results = model.val(data=dataset, split='test')
+
+            # Extract relevant metrics
+            mAP50 = results.results_dict['metrics/mAP50(B)'].round(6)
+            precision = results.results_dict['metrics/precision(B)'].round(6)
+            recall = results.results_dict['metrics/recall(B)'].round(6)
+            mAP95 = results.results_dict['metrics/mAP50-95(B)'].round(6)
+            fitness = results.results_dict['fitness'].round(6)
+
+            # Write to CSV
+            writer.writerow([experiment_name, datayml, precision, recall, mAP50, mAP95, fitness,'', model_path])
+
+print(f"Results saved to {output_csv}")

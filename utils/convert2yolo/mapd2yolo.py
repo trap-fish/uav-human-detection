@@ -1,6 +1,7 @@
 import os
 import shutil
 from PIL import Image
+from time import sleep
 
 def convert_bbox(size, box):
     """
@@ -21,9 +22,10 @@ def convert_bbox(size, box):
 
     return x_center, y_center, width, height
 
-def convert_labels(images_dir, labels_dir, output_labels_dir, output_imagesrgb_dir, output_imagesthermal_dir, type_filter={0, 1}):
+def convert_labels(images_dir, labels_dir, output_labels_dir, output_imagesrgb_dir, output_imagesthermal_dir):
     """
     Converts tab-delimited annotations into YOLO format and copies relevant images.
+    No type filter is needed since this is intended to operate on 4-channel subset.
 
     Args:
         images_dir (str): Path to the images folder.
@@ -31,7 +33,6 @@ def convert_labels(images_dir, labels_dir, output_labels_dir, output_imagesrgb_d
         output_labels_dir (str): Path to save converted labels.
         output_imagesrgb_dir (str): Path to save relevant images.
         output_imagesthermal_dir (str): Path to save relevant images.
-        type_filter (set): Set of object types to keep (e.g., {0, 1} for RGB+Thermal & Thermal).
     """
     os.makedirs(output_labels_dir, exist_ok=True)
     os.makedirs(output_imagesrgb_dir, exist_ok=True)
@@ -64,14 +65,13 @@ def convert_labels(images_dir, labels_dir, output_labels_dir, output_imagesrgb_d
                 # Convert to YOLO format
                 yolo_bbox = convert_bbox((img_width, img_height), (x1, y1, x2, y2))
                 
-                # YOLO format: class_id (always 0) + bbox coordinates
+                # YOLO format: class_id (always 0 for 4-channel) + bbox coordinates
                 output_lines.append(f"0 {' '.join(f'{x:.6f}' for x in yolo_bbox)}\n")
 
         # Save converted labels and copy corresponding image
         if output_lines:
             with open(os.path.join(output_labels_dir, label_file), "w") as f_out:
                 f_out.writelines(output_lines)
-            
             # Copy corresponding image
             shutil.copy(image_file, os.path.join(output_imagesrgb_dir, os.path.basename(image_file)))
             shutil.copy(thermal_image_file, os.path.join(output_imagesthermal_dir, os.path.basename(thermal_image_file)))
@@ -80,13 +80,14 @@ def convert_labels(images_dir, labels_dir, output_labels_dir, output_imagesrgb_d
         else:
             print(f"Skipped {label_file} (No relevant annotations) ⚠️")
 
-# Example Usage
-images_dir = "/media/citi-ai/matthew/mot-detection-training/datasets/niicu_test/images/rgb/"
-labels_dir = "/media/citi-ai/matthew/mot-detection-training/datasets/niicu_test/labels"
-output_labels_dir = "/media/citi-ai/matthew/mot-detection-training/datasets/niicu_test/yolo/labels"
-output_imagesrgb_dir = "/media/citi-ai/matthew/mot-detection-training/datasets/niicu_test/yolo/images/rgb"
-output_images_tir_dir = "/media/citi-ai/matthew/mot-detection-training/datasets/niicu_test/yolo/images/thermal"
+root_dir = "/media/citi-ai/matthew/uav-human-detection/datasets"
+subset_ls = ['train', 'val']
+for subset in subset_ls:
+    images_dir = os.path.join(root_dir, f"niicu_test/4-channel/images/rgb/{subset}")
+    labels_dir = os.path.join(root_dir, f"niicu_test/4-channel/labels/{subset}")
+    output_labels_dir = os.path.join(root_dir, f"filtered/niicu_mapd/{subset}/labels/rgb")
+    output_imagesrgb_dir = os.path.join(root_dir, f"filtered/niicu_mapd/{subset}/images/rgb")
+    output_images_tir_dir = os.path.join(root_dir, f"filtered/niicu_mapd/{subset}/images/thermal")
 
-
-convert_labels(images_dir, labels_dir, output_labels_dir, output_imagesrgb_dir,
-               output_images_tir_dir, type_filter={0, 1})  # Keep only types 0 & 1
+    convert_labels(images_dir, labels_dir, output_labels_dir, output_imagesrgb_dir,
+                output_images_tir_dir)

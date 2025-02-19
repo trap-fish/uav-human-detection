@@ -1,17 +1,20 @@
 import os
 import shutil
 
+dataset = "test-dev"
+
 # Paths to the original dataset
-dataset_dir = "/media/citi-ai/matthew/mot-detection-training/datasets/VisDrone2019-DET-train"
+root_dir = "/media/citi-ai/matthew/uav-human-detection/datasets/"
+dataset_dir = os.path.join(root_dir, f"visdrone/VisDrone2019-DET-test-dev")
 annotations_dir = os.path.join(dataset_dir, "annotations")
 images_dir = os.path.join(dataset_dir, "images")
-output_dir = "/media/citi-ai/matthew/mot-detection-training/datasets/filtered/VisDrone2019-DET-human-train"
+output_dir = os.path.join(root_dir, f"filtered/visdrone_humans/{dataset}")
 
 # Output directories
 output_images_dir = os.path.join(output_dir, "images")
-output_annotations_dir = os.path.join(output_dir, "annotations")
+output_labels_dir = os.path.join(output_dir, "labels")
 os.makedirs(output_images_dir, exist_ok=True)
-os.makedirs(output_annotations_dir, exist_ok=True)
+os.makedirs(output_labels_dir, exist_ok=True)
 
 # Define human-related class IDs based on the VisDrone dataset specification
 HUMAN_CLASS_IDS = [0, 1]  # Adjust this based on the VisDrone class mapping
@@ -43,11 +46,11 @@ def process_dataset():
     """
     Process the VisDrone dataset to retain only human-related data.
     """
-    print("processing data")
+    print(f"processing data: {annotations_dir}")
     annotation_files = os.listdir(annotations_dir)
     for annotation_file in annotation_files:
         input_annotation_path = os.path.join(annotations_dir, annotation_file)
-        output_annotation_path = os.path.join(output_annotations_dir, annotation_file)
+        output_annotation_path = os.path.join(output_labels_dir, annotation_file)
         
         # Filter annotation and copy image if relevant
         if filter_annotation(input_annotation_path, output_annotation_path):
