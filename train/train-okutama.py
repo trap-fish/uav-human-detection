@@ -8,16 +8,19 @@ wkdir = "/media/citi-ai/matthew/uav-human-detection"
 
 # yaml files for datasets
 data_rltv_path = "data_files/"
-datasets = ['combined.yaml', "Okutama.yaml", "VisDrone.yaml", "hit-uav.yaml"]
+datasets =  ["visdrone_yolo.yaml", "VisDrone.yaml"]
 
 # model paths
-model_rltv_path = "models/"
+model_dir_pth = os.path.join(wkdir, "models/")
 yolo11n_pth = "yolo11n.pt"
 yolo11s_pth = "yolo11s.pt"
+yolo11p2_path = "yolo11-p2.yaml"
 
 model_dir = {
+    "yolop2n": {"type": "yolop2", "path": yolo11p2_path},
     "yolo11n": {"type": "yolo", "path": yolo11n_pth},
-    #"yolo11s": {"type": "yolo", "path": yolo11s_pth},
+    "yolo11s": {"type": "yolo", "path": yolo11s_pth},
+    "yolop2s": {"type": "yolop2", "path": yolo11p2_path},
 }
 
 # Define experiments: model, optimizer, and learning rate combinations
@@ -54,15 +57,20 @@ for data_yml in datasets:
         print(f"\nTraining with model: {model_name}")
         model_type = model_info["type"]
         model_file = model_info["path"]
+        model_path = os.path.join(model_dir_pth, model_file)
+
+        if not os.path.isfile(model_path):
+            raise ValueError(f"Model file not found: {model_path}")
 
         # initialise model
         if model_type == "yolo":
-            model_path = os.path.join(wkdir, model_rltv_path, model_file)
-            if os.path.isfile(model_path):
-                model = YOLO(model_path)
-            else:
-                raise ValueError(f"Model file not found: {model_path}")
-
+            model = YOLO(model_path)
+        elif model_name == "yolop2n":
+            pretrained = os.path.join(model_dir_pth, "yolo11n.pt") # load yaml cfg with pretrained
+            model = YOLO(model_path).load(pretrained)
+        elif model_name == "yolop2s":
+            pretrained = os.path.join(model_dir_pth, "yolo11s.pt") # load yaml cfg with pretrained
+            model = YOLO(model_path).load(pretrained)
         else:
             raise ValueError(f"Unknown model type: {model_type}")
 
@@ -83,7 +91,7 @@ for data_yml in datasets:
                 imgsz=imgsz,
                 optimizer=exp["optimizer"],
                 lr0=exp["lr"],
-                patience=20,
+                patience=25,
                 project=results_dir,
                 name=exp_name,
                 freeze=exp["freeze"],
