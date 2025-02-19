@@ -1,24 +1,14 @@
-from sahi.utils.file import download_from_url
-from sahi.utils.ultralytics import download_yolo11n_model
 from sahi import AutoDetectionModel
 from sahi.predict import get_prediction
 from sahi.predict import get_sliced_prediction
-from PIL import Image
+import os
 
-# Download test images
-download_from_url(
-    "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg",
-    "demo_data/small-vehicles1.jpeg",
-)
-download_from_url(
-    "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/terrain2.png",
-    "demo_data/terrain2.png",
-)
+root_dir = "/media/citi-ai/matthew/uav-human-detection/"
+img_path = "datasets/uavdt/UAV-benchmark-S/S1604/img000003.jpg"
+img = os.path.join(root_dir, img_path)
 
-
-# Download YOLO11 model
-model_path = "/media/citi-ai/matthew/visdrone-train/runs/detect/train/weights/best.pt"
-download_yolo11n_model(model_path)
+model_rltv_path = os.path.join(root_dir, "results/experiment_20250214/exp_2_yolo11n_VisDrone_SGD_lr0.01_frz10_coslrTrue/weights/best.pt")
+model_path = os.path.join(root_dir, model_rltv_path)
 
 detection_model = AutoDetectionModel.from_pretrained(
     model_type="ultralytics",
@@ -28,17 +18,17 @@ detection_model = AutoDetectionModel.from_pretrained(
 )
 
 # With an image path
-result = get_prediction("demo_data/small-vehicles1.jpeg", detection_model)
-result.export_visuals(export_dir="demo_data/standard.jpeg")
+result = get_prediction(img, detection_model)
+result.export_visuals(export_dir=f"demo_data/standard_{img.split('/')[-1].replace('jpg', 'jpeg')}")
 
 result.export_visuals(export_dir="demo_data/")
 
 result = get_sliced_prediction(
-    "demo_data/small-vehicles1.jpeg",
+    img,
     detection_model,
     slice_height=256,
     slice_width=256,
     overlap_height_ratio=0.2,
     overlap_width_ratio=0.2,
 )
-result.export_visuals(export_dir="demo_data/sliced.jpeg")
+result.export_visuals(export_dir=f"demo_data/sliced_{img.split('/')[-1].replace('jpg', 'jpeg')}")
