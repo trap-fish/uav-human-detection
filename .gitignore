@@ -1,4 +1,7 @@
 /datasets/
+/demo_data/
+
+/models/
 /runs/
 
 /venv*
