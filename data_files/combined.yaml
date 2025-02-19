@@ -1,7 +1,10 @@
+# this dataset consists of a modified version of VisDrone only a single person class)
+# merged with Okutama-Action
+
 path: /media/citi-ai/matthew/uav-human-detection/datasets/combined # dataset root dir
 train: train/images # train images (relative to 'path')  6471 images
 val: val/images # val images (relative to 'path')  548 images
-
+test: test/images
 nc: 1
 # Classes
 names:

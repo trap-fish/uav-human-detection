@@ -1,0 +1,7 @@
+path: /media/citi-ai/matthew/uav-human-detection/datasets/niicu_mapd/yolo/
+train: train/images/thermal
+val: train/images/thermal
+test: train/images/thermal
+names:
+  0: Person
+nc: 1
