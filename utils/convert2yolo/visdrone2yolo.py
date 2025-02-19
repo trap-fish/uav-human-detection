@@ -1,6 +1,7 @@
 from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
+import os
 
 def convert_box(size, box):
     """
@@ -57,6 +58,11 @@ def visdrone2yolo(filtered_dir):
             out_file.writelines(lines)
 
 # Update the path to your filtered dataset
-filtered_dir = Path("/media/citi-ai/matthew/mot-detection-training/datasets/filtered/VisDrone2019-DET-human-val")
-visdrone2yolo(filtered_dir)
+
+root_dir = Path("datasets/visdrone")
+dirs = os.listdir(root_dir)
+
+for d in dirs:
+    yolo_dir = Path(os.path.join(root_dir, d))
+    visdrone2yolo(yolo_dir)
 print("Conversion completed successfully!")
