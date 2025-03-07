@@ -9,3 +9,6 @@
 *.pt
 
 results/
+
+hailo-ai/*.*
+hailo-ai/shared_with_docker
