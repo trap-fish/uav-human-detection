@@ -8,31 +8,36 @@ wkdir = "/media/citi-ai/matthew/uav-human-detection"
 
 # yaml files for datasets
 data_rltv_path = "data_files/"
-datasets =  ["visdrone_yolo.yaml", "VisDrone.yaml"]
+datasets =  ["VisDrone.yaml"]
 
 # model paths
 model_dir_pth = os.path.join(wkdir, "models/")
+yolov5n_pth = "yolov5nu.pt"
 yolo11n_pth = "yolo11n.pt"
 yolo11s_pth = "yolo11s.pt"
 yolo11p2_path = "yolo11-p2.yaml"
+yolo5p2_path = "yolo5-p2.yaml"
+
 
 model_dir = {
-    "yolop2n": {"type": "yolop2", "path": yolo11p2_path},
-    "yolo11n": {"type": "yolo", "path": yolo11n_pth},
-    "yolo11s": {"type": "yolo", "path": yolo11s_pth},
-    "yolop2s": {"type": "yolop2", "path": yolo11p2_path},
+    "yolo5n": {"type": "yolo", "path": yolov5n_pth},
+    #"yolop2n": {"type": "yolop2", "path": yolo5p2_path}
+    #"yolop2n": {"type": "yolop2", "path": yolo11p2_path},
+    # "yolo11n": {"type": "yolo", "path": yolo11n_pth},
+    # "yolo11s": {"type": "yolo", "path": yolo11s_pth},
+    # "yolop2s": {"type": "yolop2", "path": yolo11p2_path},
 }
 
 # Define experiments: model, optimizer, and learning rate combinations
 experiments = [
     {"optimizer": "SGD", "lr": 0.01, "freeze": None, "cos_lr": True},
     {"optimizer": "SGD", "lr": 0.01, "freeze": 10, "cos_lr": True},
-    {"optimizer": "SGD", "lr": 0.01, "freeze": 22, "cos_lr": True},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 23, "cos_lr": True},
     {"optimizer": "SGD", "lr": 0.01, "freeze": None, "cos_lr": False},
     {"optimizer": "SGD", "lr": 0.001, "freeze": None, "cos_lr": False},
     {"optimizer": "SGD", "lr": 0.0005, "freeze": None, "cos_lr": False},
     {"optimizer": "SGD", "lr": 0.01, "freeze": 10, "cos_lr": False},
-    {"optimizer": "SGD", "lr": 0.01, "freeze": 22, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 23, "cos_lr": False},
     {"optimizer": "SGD", "lr": 0.001, "freeze": 10, "cos_lr": False},
     {"optimizer": "SGD", "lr": 0.0005, "freeze": 10, "cos_lr": False},
 ]
