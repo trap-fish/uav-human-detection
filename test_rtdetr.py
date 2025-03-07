@@ -17,7 +17,8 @@ wkdir = "/media/citi-ai/matthew/uav-human-detection"
 # model_rltv_path = "runs/detect/train31/weights/best.pt" # train28 is trained on visdrone, 31 is combined visdrone/okutama
 model_rltv_path = "/media/citi-ai/matthew/uav-human-detection/runs/detect/train34/weights/best.pt"
 model_path = os.path.join(wkdir, model_rltv_path)
-model = YOLO(model_path)
+dtype='int8'
+model = YOLO(f"/media/citi-ai/matthew/uav-human-detection/runs/detect/train34/weights/best_saved_model/best_{dtype}.tflite", task='detect')
 
 #data_path = "human-det.yaml"
 #data_path = "Okutama.yaml"
@@ -28,13 +29,17 @@ data_path = os.path.join(wkdir, data_rltv_path)
 
 project_dir = f"results/exp_1_yolo11n_SGD_lr0.01_Okutama_finetuned_test_on_{dataset}/"
 os.makedirs(project_dir, exist_ok=True)
+imgpath = '/media/citi-ai/matthew/uav-human-detection/datasets/filtered/visdrone_humans/val/images/0000001_02999_d_0000005.jpg'
+imgsz = (640,640)
+res = model.predict(imgpath, project=project_dir, device='cpu', imgsz=imgsz)
+res[0].plot(show=True)
 
-# Evaluate on the test dataset
-results = model.val(data=data_path, split='test', project=project_dir)  # Use the test split
-results_path = project_dir
+# # Evaluate on the test dataset
+# results = model.val(data=data_path, split='test', project=project_dir, device='cpu')  # Use the test split
+# results_path = project_dir
 
-# Save results to a file
-output_file = os.path.join(results_path, f"test_results.txt")
-with open(output_file, "w") as f:
-    f.write(str(results))
-    f.close()
+# # Save results to a file
+# output_file = os.path.join(results_path, f"test_results.txt")
+# with open(output_file, "w") as f:
+#     f.write(str(results))
+#     f.close()
