@@ -1,25 +1,25 @@
 import os
 import shutil
 
-dataset = "test-dev"
+dataset = "train" 
 
 # Paths to the original dataset
 root_dir = "/media/citi-ai/matthew/uav-human-detection/datasets/"
-dataset_dir = os.path.join(root_dir, f"visdrone/VisDrone2019-DET-test-dev")
+dataset_dir = os.path.join(root_dir, f"visdrone/VisDrone2019-DET-{dataset}")
 annotations_dir = os.path.join(dataset_dir, "annotations")
 images_dir = os.path.join(dataset_dir, "images")
 output_dir = os.path.join(root_dir, f"filtered/visdrone_humans/{dataset}")
 
 # Output directories
 output_images_dir = os.path.join(output_dir, "images")
-output_labels_dir = os.path.join(output_dir, "labels")
+output_labels_dir = os.path.join(output_dir, "annotations")
 os.makedirs(output_images_dir, exist_ok=True)
 os.makedirs(output_labels_dir, exist_ok=True)
 
 # Define human-related class IDs based on the VisDrone dataset specification
-HUMAN_CLASS_IDS = [0, 1]  # Adjust this based on the VisDrone class mapping
+HUMAN_CLASS_IDS = [0, 1, 2]  # Adjust this based on the VisDrone class mapping
 
-def filter_annotation(input_annotation_file, output_annotation_file):
+def filter_annotation(input_annotation_file, output_annotation_file, mergeClass=False):
     """
     Filters the .txt annotation file for human objects only.
     """
@@ -27,11 +27,11 @@ def filter_annotation(input_annotation_file, output_annotation_file):
     with open(input_annotation_file, "r") as f:
         lines = f.readlines()
         for line in lines:
-            components = line.strip().split(",")
-            class_id = int(components[5])  # 6th column is class ID
-            if class_id in HUMAN_CLASS_IDS:
-                filtered_lines.append(line)
-                
+            x, y, w, h, score, class_id, truncation, occulsion = line.strip().split(",")
+            if int(class_id) in HUMAN_CLASS_IDS:
+                if mergeClass:
+                    class_id = 1  # Map all human classes to 1
+                filtered_lines.append(f"{x}, {y}, {w}, {h}, {score}, {class_id}, {truncation}, {occulsion}\n")
     
     if not filtered_lines:
         return False  # No human-related annotations found
