@@ -1,17 +1,16 @@
 import glob
-import imagesize
 import os
 import json
 from PIL import Image
 from tqdm import tqdm
 import argparse
 
-def convert(dir_data):
+def convert(datapath, output_dir):
 
-  train_data = dir_data + '/VisDrone2019-DET-train/'
-  val_data = dir_data + '/VisDrone2019-DET-val/'
-  test_data = dir_data + '/VisDrone2019-DET-test-dev/'
-  loops = [train_data, val_data, test_data]
+  train_data = datapath + 'train/'
+  val_data = datapath + 'val/'
+#   test_data = datapath + 'dev/'
+  loops = [train_data, val_data]
   for l in loops:
       print('Solving ', l)
       dict_coco = {}
@@ -22,11 +21,10 @@ def convert(dir_data):
       print('Solving images')
       dict_image_and_id = {}
       dict_coco['images'] = []
-      img_id = 0
+      img_id = 1
       for img in tqdm(glob.glob(l + dir_imgs + '*')):
-          # image = Image.open(img)
-          width, height = imagesize.get(img)
-          # file_name = os.path.split(img)
+          image = Image.open(img)
+          width, height = image.size
           file_name_save = os.path.split(img)[-1]
           dict_coco['images'].append({
               "id" : img_id,
@@ -42,10 +40,8 @@ def convert(dir_data):
       print('Solving annotations')
       dir_labels = '/annotations/'
       dict_coco['annotations'] = []
-      anno_id = 0
+      anno_id = 1
       for file_txt in tqdm(glob.glob(l + dir_labels + '*.txt')):
-          # with open(file_txt, 'r') as f:
-          #     annotations = f.read()
           annotations = open(file_txt,'r').read()
           annotations = annotations.split('\n')
           for i in range(0, len(annotations)):
@@ -58,6 +54,7 @@ def convert(dir_data):
               area = int(detection[2]) * int(detection[3])
               segmentation = []
               iscrowd = 0
+              ignore = 0
               img_name = os.path.splitext(os.path.split(file_txt)[-1])[0] + '.jpg'
               image_id = dict_image_and_id[img_name]
 
@@ -67,8 +64,9 @@ def convert(dir_data):
                   "category_id": category_id,
                   "bbox": bbox,
                   "area": area,
-                  "iscrowd": 0,
-                  "ignore": 0
+                  "iscrowd": iscrowd,
+                  "ignore": ignore,
+                  "segmentation": segmentation
               })
 
               anno_id = anno_id + 1
@@ -125,17 +123,19 @@ def convert(dir_data):
           "supercategory": "none"}
           ]
 
-      with open('annotations_VisDrone_' + l.split('-')[-1][:-1] + '.json', 'w') as f:
+      with open(os.path.join(output_dir, 'annotations_VisDroneHumans_' + l.split('-')[-1][:-1] + '.json'), 'w') as f:
           json.dump(dict_coco, f)
 
 def get_args():
     parser = argparse.ArgumentParser('Train')
     parser.add_argument('--data_dir', type=str, default='./',
                         help='Data dir', dest='data_dir')
+    parser.add_argument('--output_dir', type=str, default='./',
+                        help='Destination dir', dest='output_dir')
     args = parser.parse_args()
 
     return args
 
 if __name__ == '__main__':
     args = get_args()
-    convert(args.data_dir)
+    convert(args.data_dir, args.output_dir)
