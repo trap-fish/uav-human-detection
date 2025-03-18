@@ -45,7 +45,7 @@ def visdrone2yolo(filtered_dir):
         lines = []
         with open(annotation_file, 'r') as file:
             for row in [x.split(',') for x in file.read().strip().splitlines()]:
-                if row[4] == '0':  # Ignore regions with class 0
+                if int(row[4]) == 0:  # Ignore regions with class 0
                     continue
                 cls = int(row[5]) - 1  # Adjust class index to 0-based
                 box = tuple(map(int, row[:4]))
@@ -59,7 +59,7 @@ def visdrone2yolo(filtered_dir):
 
 # Update the path to your filtered dataset
 
-root_dir = Path("datasets/visdrone")
+root_dir = Path("/media/citi-ai/matthew/uav-human-detection/datasets/filtered/visdrone_humans")
 dirs = os.listdir(root_dir)
 
 for d in dirs:
