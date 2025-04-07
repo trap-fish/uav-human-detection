@@ -6,7 +6,7 @@ import time
 # Define the root directory and dataset
 root_dir = "/media/citi-ai/matthew/uav-human-detection/"
 data_list = ["VisDrone.yaml"]
-results_dir = os.path.join(root_dir, "results/experiment_20250315")
+results_dir = os.path.join(root_dir, "results/experiment_20250407")
 output_csv = os.path.join(results_dir, "visdrone2cls_results_val_all.csv")
 formats = ["onnx", "openvino"]
 device = "cpu"
@@ -14,7 +14,7 @@ device = "cpu"
     # Initialize CSV
 with open(output_csv, mode='w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(['model_type', 'experiment_name', 'dataset', 'precision', 'recall', 'mAP50', 'mAP95','fitness', 'processing_time', 'fps', 'preprocess', 'inference', 'postprocess', 'loss','', 'model_path'])
+    writer.writerow(['model_type', 'model_format', 'experiment_name', 'dataset', 'precision', 'recall', 'mAP50', 'mAP95','fitness', 'processing_time', 'fps', 'preprocess', 'inference', 'postprocess', 'loss', '', 'model_path'])
     for datayml in data_list:
 
         dataset = os.path.join(root_dir, "data_files", datayml)
@@ -41,12 +41,12 @@ with open(output_csv, mode='w', newline='') as file:
                 print(f"\n\nTesting {experiment_name} with model {model_path}\n\n")
 
                 # Load model and run validation
-                model = YOLO(model_path)
+                model = YOLO(model_path, task='detect')
                 start_time = time.perf_counter()
                 results = model.val(data=dataset, split='val', device=device)
                 end_time = time.perf_counter()
 
-                processing_time = end_time - start_time
+                processing_time = round(end_time - start_time, 6)
                 fps = 532 / processing_time  # visdrone val has 532 images
 
                 # Extract relevant metrics
@@ -63,6 +63,6 @@ with open(output_csv, mode='w', newline='') as file:
                 model_type = str.split(experiment_name, '_')[2]
 
                 # Write to CSV
-                writer.writerow([model_type, experiment_name, datayml, precision, recall, mAP50, mAP95, fitness , processing_time, fps, preprocess, inference, postprocess, loss, '', model_path])
+                writer.writerow([model_type, model_format, experiment_name, datayml, precision, recall, mAP50, mAP95, fitness , processing_time, fps, preprocess, inference, postprocess, loss, '', model_path])
 
 print(f"Results saved to {output_csv}")
