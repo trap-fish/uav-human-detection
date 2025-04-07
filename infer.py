@@ -57,19 +57,20 @@ def get_detections(results_path, img_id=None):
         assert img_id is not None, f"Image ID has not been found in {results}"
     return preds
 
-root_dir = "/media/citi-ai/matthew/uav-human-detection"
-annotations_path = "hailo-ai/shared_with_docker/visdrone/annotations_VisDroneHumans_val.json"
-results_path = f"hailo-ai/shared_with_docker/visdrone/detections_VisDrone_quant_dets.json"
-images_dir = "/media/citi-ai/matthew/uav-human-detection/hailo-ai/shared_with_docker/VisDrone2019-DET-val/images/"
+root_dir = "/media/citi-ai/matthew/uav-human-detection/hailo-ai"
+annotations_path = "/shared_with_docker/visdrone/annotations_VisDroneHumans_val.json"
+results_path = f"/shared_with_docker/visdrone/detections_VisDrone_quant_dets.json"
+images_dir = os.path.join(root_dir, "/shared_with_docker/visdrone/VisDrone2019-DET-val/images")
 
 
-img_id = 234 # known imageid as per the dataset
+img_id = 8 # known imageid as per the dataset
 gt, file_name = get_annotations(os.path.join(root_dir, annotations_path), img_id=img_id)
 detections = get_detections(os.path.join(root_dir, results_path), img_id=img_id)
 
 # Load the image
 imagefilename = file_name #"0000001_02999_d_0000005.jpg" #"0000001_03999_d_0000007.jpg" 
 imgpth = os.path.join(images_dir, imagefilename)
+print(f"\n\nreading image at {imgpth}...\n\n")
 img = cv2.imread(imgpth)
 img_name = os.path.basename(imgpth).split('.')[0]
 print(img)
@@ -126,7 +127,7 @@ for idx, labels in enumerate(gt):
     cv2.putText(img, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1, cv2.LINE_AA)
 
 
-
+print(img)
 # Display the image with bounding boxes
 cv2.imwrite('visdrone_inferCOCO_quant_img1.jpg', img)
 cv2.waitKey(0)  # Wait for key press
