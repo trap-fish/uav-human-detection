@@ -1,17 +1,39 @@
 import os
 import csv
-from ultralytics import YOLO
+from ultralytics import YOLO, RTDETR
 import time
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--results_pth",
+                    help="relative path of the results file, e.g. results/experiment_<experiment_type>",
+                    type=str)
+parser.add_argument("-j", "--save_json",
+                    help="to also save the results to a coco formated json file",
+                    type=bool, default=False)
+parser.add_argument("-n", "--model_name",
+                    help="e.g yolo, rtdetr",
+                    type=str)
+args = parser.parse_args()
+results_pth = args.results_pth
+save_json = args.save_json
+model_name = args.model_name
 
 # Define the root directory and dataset
 root_dir = "/media/citi-ai/matthew/uav-human-detection/"
 data_list = ["VisDrone.yaml"]
-results_dir = os.path.join(root_dir, "results/experiment_20250407")
-output_csv = os.path.join(results_dir, "visdrone2cls_results_val_all.csv")
+results_dir = os.path.join(root_dir, results_pth)
+val_dir = os.path.join(results_dir, "validation_runs")
+output_csv = os.path.join(val_dir, "visdrone2cls_results_val_all.csv")
+
 formats = ["onnx", "openvino"]
 device = "cpu"
 
-    # Initialize CSV
+# create validation dir if not exists
+if not os.path.exists(val_dir):
+    os.makedirs(val_dir)
+
+# initialise the csv
 with open(output_csv, mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['model_type', 'model_format', 'experiment_name', 'dataset', 'precision', 'recall', 'mAP50', 'mAP95','fitness', 'processing_time', 'fps', 'preprocess', 'inference', 'postprocess', 'loss', '', 'model_path'])
@@ -38,12 +60,18 @@ with open(output_csv, mode='w', newline='') as file:
                 else:
                     model_path = os.path.join(exp_dir, f"weights/best.{model_format}")
                 
+                val_subdir= experiment_name + "_" + model_format
                 print(f"\n\nTesting {experiment_name} with model {model_path}\n\n")
 
                 # Load model and run validation
-                model = YOLO(model_path, task='detect')
+                if model_name == 'rtdetr':
+                    model = RTDETR(model_path)
+                else:
+                    model = YOLO(model_path, task='detect')
                 start_time = time.perf_counter()
-                results = model.val(data=dataset, split='val', device=device)
+                results = model.val(data=dataset, split='val', device=device,
+                                    save_json=save_json, project=val_dir,
+                                    name=val_subdir)
                 end_time = time.perf_counter()
 
                 processing_time = round(end_time - start_time, 6)
