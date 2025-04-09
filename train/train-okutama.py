@@ -17,38 +17,42 @@ yolo5s_pth = "yolov5su.pt"
 yolov8n_pth = "yolov8n.pt"
 yolo11n_pth = "yolo11n.pt"
 yolo11s_pth = "yolo11s.pt"
+rtdetr_pth = "rtdetr-l.pt"
 #yolo11p2_path = "yolo11-p2.yaml"
 #yolo5p2_path = "yolo5-p2.yaml"
 
 
 model_dir = {
-    "yolo5n": {"type": "yolo", "path": yolov5n_pth},
-    "yolo5s": {"type": "yolo", "path": yolo5s_pth},
+    # "yolo5n": {"type": "yolo", "path": yolov5n_pth},
+    # "yolo5s": {"type": "yolo", "path": yolo5s_pth},
     #"yolop2n": {"type": "yolop2", "path": yolo5p2_path}
     #"yolop2n": {"type": "yolop2", "path": yolo11p2_path},
     #"yolov8n": {"type": "yolo", "path": yolov8n_pth},
     # "yolo11n": {"type": "yolo", "path": yolo11n_pth},
-    #"yolo11s": {"type": "yolo", "path": yolo11s_pth},
+    "yolo11s": {"type": "yolo", "path": yolo11s_pth},
     # "yolop2s": {"type": "yolop2", "path": yolo11p2_path},
+    # "rtdetrl": {"type": "rtdetr", "path": rtdetr_pth},
 }
 
 # Define experiments: model, optimizer, and learning rate combinations
 experiments = [
     {"optimizer": "SGD", "lr": 0.01, "freeze": None, "cos_lr": True},
-    {"optimizer": "SGD", "lr": 0.01, "freeze": 10, "cos_lr": True},
-    {"optimizer": "SGD", "lr": 0.01, "freeze": 23, "cos_lr": True}, # 22 for yolo11
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 9, "cos_lr": True}, # 10 for yolo, 9 for rtdetr
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 27, "cos_lr": True}, # 22 for yolo11, 27 for rtdet
     {"optimizer": "SGD", "lr": 0.01, "freeze": None, "cos_lr": False},
     {"optimizer": "SGD", "lr": 0.001, "freeze": None, "cos_lr": False},
     {"optimizer": "SGD", "lr": 0.0005, "freeze": None, "cos_lr": False},
-    {"optimizer": "SGD", "lr": 0.01, "freeze": 10, "cos_lr": False},
-    {"optimizer": "SGD", "lr": 0.01, "freeze": 23, "cos_lr": False},
-    {"optimizer": "SGD", "lr": 0.001, "freeze": 10, "cos_lr": False},
-    {"optimizer": "SGD", "lr": 0.0005, "freeze": 10, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 9, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.01, "freeze": 27, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.001, "freeze": 9, "cos_lr": False},
+    {"optimizer": "SGD", "lr": 0.0005, "freeze": 9, "cos_lr": False},
 ]
 
 # Paths and parameters
-epochs = 400  # Number of training epochs
-imgsz = (640,480)  # Image size for training
+EPOCHS = 150  # Number of training epochs
+BATCH_SZ = 16
+PATIENCE = 20
+IMGSZ = 640  # Image size for training
 
 # Directory to save results
 res_rltv_dir = f"results/experiment_{expdate}"
@@ -80,14 +84,14 @@ for data_yml in datasets:
         elif model_name == "yolop2s":
             pretrained = os.path.join(model_dir_pth, "yolo11s.pt") # load yaml cfg with pretrained
             model = YOLO(model_path).load(pretrained)
+        elif model_type == "rtdetr":
+            model = RTDETR(model_path)
         else:
             raise ValueError(f"Unknown model type: {model_type}")
 
         # Loop through experiments
         for i, exp in enumerate(experiments):
             print(f"\nStarting Experiment {i + 1}: {exp}")
-            
-            
             params = f"{exp['optimizer']}_lr{exp['lr']}_frz{exp['freeze']}_coslr{exp['cos_lr']}"
             variation = data_path.split('/')[-1].split(".")[0]
             exp_name = f"exp_{i + 1}_{model_name}_{variation}_{params}"
@@ -95,12 +99,12 @@ for data_yml in datasets:
             # Train the model
             model.train(
                 data=data_path,
-                batch=16,
-                epochs=epochs,
-                imgsz=imgsz,
+                batch=BATCH_SZ,
+                epochs=EPOCHS,
+                imgsz=IMGSZ,
                 optimizer=exp["optimizer"],
                 lr0=exp["lr"],
-                patience=25,
+                patience=PATIENCE,
                 project=results_dir,
                 name=exp_name,
                 freeze=exp["freeze"],
