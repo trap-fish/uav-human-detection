@@ -14,19 +14,28 @@ parser.add_argument("-j", "--save_json",
 parser.add_argument("-n", "--model_name",
                     help="e.g yolo, rtdetr",
                     type=str)
+parser.add_argument("-m", "--model_format",
+                    help="e.g ['onnx', 'openvino']",
+                    type=list, default=['onnx', 'openvino'])
+parser.add_argument("-s", "--single_cls",
+                    help="single class detection",
+                    type=bool, default=False)
+
 args = parser.parse_args()
 results_pth = args.results_pth
 save_json = args.save_json
 model_name = args.model_name
+model_format = args.model_format
+single_cls = args.single_cls
 
 # Define the root directory and dataset
 root_dir = "/media/citi-ai/matthew/uav-human-detection/"
 data_list = ["VisDrone.yaml"]
 results_dir = os.path.join(root_dir, results_pth)
-val_dir = os.path.join(results_dir, "validation_runs")
+val_dir = os.path.join(results_dir, "validation_runs_FIXED")
 output_csv = os.path.join(val_dir, "visdrone2cls_results_val_all.csv")
 
-formats = ["onnx", "openvino"]
+formats = model_format
 device = "cpu"
 
 # create validation dir if not exists
@@ -71,7 +80,7 @@ with open(output_csv, mode='w', newline='') as file:
                 start_time = time.perf_counter()
                 results = model.val(data=dataset, split='val', device=device,
                                     save_json=save_json, project=val_dir,
-                                    name=val_subdir)
+                                    name=val_subdir, single_cls=single_cls)
                 end_time = time.perf_counter()
 
                 processing_time = round(end_time - start_time, 6)
