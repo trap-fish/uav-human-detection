@@ -10,3 +10,14 @@ test: test-dev/images
 names:
   0: pedestrian
   1: people
+
+# # use these if using hailomz cli
+# train: /workspace/local/datasets/filtered/visdrone_humans/train/images # train images (relative to 'path')  6471 images
+# val: /workspace/local/datasets/filtered/visdrone_humans/val/images # val images (relative to 'path')  548 images
+
+# # number of classes
+# nc: 3
+
+# # class names
+# names: ['pedestrian', 'person', 'background']
+
