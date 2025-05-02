@@ -14,9 +14,13 @@ parser.add_argument("-j", "--save_json",
 parser.add_argument("-n", "--model_name",
                     help="e.g yolo, rtdetr",
                     type=str)
-parser.add_argument("-m", "--model_format",
-                    help="e.g ['onnx', 'openvino']",
-                    type=list, default=['onnx', 'openvino'])
+parser.add_argument(
+    "-m", "--model_format",
+    help="List of model formats, e.g. -m onnx openvino",
+    nargs='+',  # '+' means one or more arguments
+    type=str,
+    default=['onnx', 'openvino']
+)
 parser.add_argument("-s", "--single_cls",
                     help="single class detection",
                     type=bool, default=False)
