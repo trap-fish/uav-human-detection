@@ -10,7 +10,7 @@
     "classes": 1,
     "bbox_decoders": [
         {
-            "name": "bbox_decoder47",
+            "name": "bbox_decoder73",
             "w": [
                 2.19531,
                 2.93164,
@@ -21,11 +21,11 @@
                 6.89453,
                 7.25391
             ],
-            "stride": 8,
-            "encoded_layer": "conv47"
+            "stride": 4,
+            "encoded_layer": "conv73"
         },
         {
-            "name": "bbox_decoder54",
+            "name": "bbox_decoder84",
             "w": [
                 4.14453,
                 6.77734,
@@ -36,11 +36,11 @@
                 10.38281,
                 15.98438
             ],
-            "stride": 16,
-            "encoded_layer": "conv54"
+            "stride": 8,
+            "encoded_layer": "conv84"
         },
         {
-            "name": "bbox_decoder60",
+            "name": "bbox_decoder94",
             "w": [
                 10.91406,
                 10.88281,
@@ -51,8 +51,8 @@
                 23.17188,
                 30.65625
             ],
-            "stride": 32,
-            "encoded_layer": "conv60"
+            "stride": 16,
+            "encoded_layer": "conv94"
         }
     ]
 }
