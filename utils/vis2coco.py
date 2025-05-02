@@ -15,7 +15,7 @@ def convert(datapath, output_dir):
       print('Solving ', l)
       dict_coco = {}
 
-      dir_imgs = './images/'
+      dir_imgs = 'images/'
 
       ''' Key: images '''
       print('Solving images')
@@ -123,7 +123,7 @@ def convert(datapath, output_dir):
           "supercategory": "none"}
           ]
 
-      with open(os.path.join(output_dir, 'annotations_VisDroneHumans_' + l.split('-')[-1][:-1] + '.json'), 'w') as f:
+      with open(os.path.join(output_dir, 'export_annotations_VisDroneHumans_' + l.split('/')[-1] + '.json'), 'w') as f:
           json.dump(dict_coco, f)
 
 def get_args():
