@@ -1,0 +1,43 @@
+# Ultralytics YOLO11 modified for P2–P4 detection only
+
+# Parameters
+nc: 80
+scales:
+  n: [0.50, 0.25, 1024]
+  s: [0.50, 0.50, 1024]
+  m: [0.50, 1.00, 512]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.50, 512]
+
+# Backbone (up to P4 with SPPF on P4 only)
+backbone:
+  - [-1, 1, Conv, [64, 3, 2]]          # 0 - P1/2
+  - [-1, 1, Conv, [128, 3, 2]]         # 1 - P2/4
+  - [-1, 2, C3k2, [256, False, 0.25]]  # 2
+  - [-1, 1, Conv, [256, 3, 2]]         # 3 - P3/8
+  - [-1, 2, C3k2, [512, False, 0.25]]  # 4
+  - [-1, 1, Conv, [512, 3, 2]]         # 5 - P4/16
+  - [-1, 2, C3k2, [512, True]]         # 6
+  - [-1, 1, SPPF, [512, 5]]            # 7 - apply SPPF to P4
+  - [-1, 2, C2PSA, [512]]              # 8
+
+# Head (P2–P4 outputs only)
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]   # 9
+  - [[-1, 4], 1, Concat, [1]]                    # 10 - cat P3
+  - [-1, 2, C3k2, [512, False]]                  # 11
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]   # 12
+  - [[-1, 2], 1, Concat, [1]]                    # 13 - cat P2
+  - [-1, 2, C3k2, [256, False]]                  # 14 (P2/4)
+
+  - [-1, 1, Conv, [256, 3, 2]]                   # 15
+  - [[-1, 11], 1, Concat, [1]]                   # 16 - P3 path
+  - [-1, 2, C3k2, [512, False]]                  # 17 (P3/8)
+
+  - [-1, 1, Conv, [512, 3, 2]]                   # 18
+  - [[-1, 8], 1, Concat, [1]]                    # 19 - P4 path (C2PSA output)
+  - [-1, 2, C3k2, [512, False]]                  # 20 (P4/16)
+
+  - [[14, 17, 20], 1, Detect, [nc]]              # 21 - Detect(P2, P3, P4)
+
