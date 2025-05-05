@@ -1,7 +1,7 @@
 import os
 import shutil
 
-dataset = "train" 
+dataset = "test-dev" 
 
 # Paths to the original dataset
 root_dir = "/media/citi-ai/matthew/uav-human-detection/datasets/"

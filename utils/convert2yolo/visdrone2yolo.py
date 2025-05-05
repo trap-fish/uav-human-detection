@@ -63,6 +63,8 @@ root_dir = Path("/media/citi-ai/matthew/uav-human-detection/datasets/filtered/vi
 dirs = os.listdir(root_dir)
 
 for d in dirs:
-    yolo_dir = Path(os.path.join(root_dir, d))
-    visdrone2yolo(yolo_dir)
+    if d == 'test-dev':
+        print(f"processing {d}")
+        yolo_dir = Path(os.path.join(root_dir, d))
+        visdrone2yolo(yolo_dir)
 print("Conversion completed successfully!")

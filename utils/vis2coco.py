@@ -9,8 +9,8 @@ def convert(datapath, output_dir):
 
   train_data = datapath + 'train/'
   val_data = datapath + 'val/'
-#   test_data = datapath + 'dev/'
-  loops = [train_data, val_data]
+  test_data = datapath + 'test-dev/'
+  loops = [train_data, val_data, test_data]
   for l in loops:
       print('Solving ', l)
       dict_coco = {}
@@ -122,9 +122,10 @@ def convert(datapath, output_dir):
           "name": "others",
           "supercategory": "none"}
           ]
-
-      with open(os.path.join(output_dir, 'export_annotations_VisDroneHumans_' + l.split('/')[-1] + '.json'), 'w') as f:
+      print(f"****************************************\n{l.rstrip("/").split("/")[-1]}\n\n")
+      with open(os.path.join(output_dir, 'cocoformat_annotations_VisDroneHumans_' + l.rstrip("/").split("/")[-1] + '.json'), 'w') as f:
           json.dump(dict_coco, f)
+
 
 def get_args():
     parser = argparse.ArgumentParser('Train')
