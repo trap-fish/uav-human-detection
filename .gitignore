@@ -13,4 +13,9 @@ results/
 hailo-ai/*.*
 hailo-ai/shared_with_docker
 
+hailo-ai/notebooks/*.json
+*.png
+*.jpg
+*.log
+*.ipynb_checkpoints
 !/media/citi-ai/matthew/uav-human-detection/hailo-ai/shared_with_docker/visdrone/postprocess_config
