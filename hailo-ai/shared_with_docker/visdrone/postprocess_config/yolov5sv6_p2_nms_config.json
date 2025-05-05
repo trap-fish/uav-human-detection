@@ -1,0 +1,58 @@
+{
+    "nms_scores_th": 0.001,
+    "nms_iou_th": 0.6,
+    "image_dims": [
+        640,
+        640
+    ],
+    "max_proposals_per_class": 100,
+    "background_removal": false,
+    "classes": 1,
+    "bbox_decoders": [
+        {
+            "name": "bbox_decoder41",
+            "w": [
+                2.19531,
+                2.93164,
+                4.87891
+            ],
+            "h": [
+                3.97852,
+                6.89453,
+                7.25391
+            ],
+            "stride": 4,
+            "encoded_layer": "conv41"
+        },
+        {
+            "name": "bbox_decoder48",
+            "w": [
+                4.14453,
+                6.77734,
+                6.82031
+            ],
+            "h": [
+                10.78125,
+                10.38281,
+                15.98438
+            ],
+            "stride": 8,
+            "encoded_layer": "conv48"
+        },
+        {
+            "name": "bbox_decoder54",
+            "w": [
+                10.91406,
+                10.88281,
+                17.09375
+            ],
+            "h": [
+                14.60156,
+                23.17188,
+                30.65625
+            ],
+            "stride": 16,
+            "encoded_layer": "conv54"
+        }
+    ]
+}
