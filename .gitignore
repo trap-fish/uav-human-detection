@@ -12,3 +12,5 @@ results/
 
 hailo-ai/*.*
 hailo-ai/shared_with_docker
+
+!/media/citi-ai/matthew/uav-human-detection/hailo-ai/shared_with_docker/visdrone/postprocess_config
